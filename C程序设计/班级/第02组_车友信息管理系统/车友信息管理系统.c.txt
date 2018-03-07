@@ -1,0 +1,707 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<time.h>
+#include<conio.h>
+#include<ctype.h>
+void save(char *name, int n);
+int readout(char *name, char *type);
+void insert(char *name);
+void deletedata(char *name);
+void rankout(char *name);
+void deletefile(char *name);
+void fileinitialize(char *name);
+void update(char *name);
+void cleanscreen();
+void makechoice(char *name);
+int main();
+int check(char *ps)     //检验的函数 （密码） 
+{
+	char passwd[]="666666"; //设定密码是多少。
+	int u=0;
+	int flag=1;
+	for(;*ps!='\0'&& flag;ps++)
+	{
+		if(*ps>='a' && *ps<='z')
+		*ps=*ps-32+2;
+		if(*ps!=passwd[u])
+		flag=0;
+		else
+		u++;
+	 } 
+	return flag;
+}
+struct car_info {//声明定义结构体 
+    char name[10]; //会员名
+	char nickname[10]; //车主昵称
+	char sex[4];//车主性别
+	char object[10];//车主职业
+	int driving_year;//车龄
+	int years;//车主年龄
+	char vehicle_brand[10];//车子品牌
+	char vehicle_style[10];//车款
+	char vehicle_coolor[10];//车子颜色
+} info[100], insertinfo[100];
+char filename[50] = "D:\\cheyou.txt";
+char type[10];
+char *p;
+void save(char *name, int n) {
+    /*定义写入文件的方法来将内存中的数据写入到指定的文件中*/
+    FILE *fp;
+    int i;
+    if ((fp = fopen(name, "w")) == NULL) {
+        printf("文件打开错误\n");
+        printf("检查并确保这台机器上有默认路径所指向的盘符（D）并重试\n");
+        exit(0);
+    }
+    for (i = 0; i < n; i++) {
+        if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+            printf("文件写入错误");
+    }
+    fclose(fp);
+}
+int readout(char *name, char *type) {
+    /*定义从文件中读取数据的函数，此函数将指定文件中的数据读取到内存中
+    已准备接下来的操作*/
+    int i;
+    FILE *fp;
+    if ((fp = fopen(name, type)) == NULL) {
+        printf("文件打开错误\n");
+        system("pause");
+        makechoice(filename);
+    }
+    printf("\n=================================================================================\n");
+    printf("会员名\t车主昵称\t性别\t职业\t驾驶年龄\t车主年龄\t车辆品牌\t车款\t颜色\t\n");
+    for (i = 0; fread(&info[i], sizeof (struct car_info), 1, fp) != 0; i++) {
+        printf("%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t*\n",info[i].name,
+				info[i].nickname,info[i].sex,info[i].object,info[i].driving_year,info[i].years,
+				info[i].vehicle_brand,info[i].vehicle_style,info[i].vehicle_coolor);
+    }
+    printf("===================================================================================\n");
+    printf("共有 %d 条记录\n\n", i);
+    fclose(fp);
+    return i;
+}
+void insert(char *name) {
+    /*定义插入数据到文件中的方法
+        此方法的思想是先将文件中的数据读取到内存中在
+        内存中的进行一系列的数据操作之后在将操作处理后的新数据
+        利用存数据函数存到文件中*/
+    FILE *fp;
+    int i, j, k, n, choice, flag, number;
+    char insertname[10];
+
+    p="r";
+    strcpy(type, p);
+    readout(filename, type);
+    printf("请选择插入方式\n");
+    printf("1  在所有记录的末尾插入；\t2  指定位置插入\n请您选择（1,2）：");
+    scanf("%d", &choice);
+    switch (choice) {
+        case 1:/*定义直接末未插入的方法这种情况下数据将直接被插入到文件的末尾*/
+            printf("请输入您要插入的记录数\nnumber=");
+            scanf("%d", &n);
+            for (i = 0; i < n; i++) {//get infomation from keybord to memory
+                printf(">NO_%d ", i + 1);
+        printf("请输入会员的信息\n");
+     	printf("\n");
+     	
+     	printf("1.请输入会员名\n");    
+		scanf("%s",info[i].name);
+		printf("\n");
+		
+		printf("2.请输入昵称\n");
+		scanf("%s",info[i].nickname);
+		printf("\n");
+		
+		printf("3.请输入性别\n");
+		scanf("%s",info[i].sex);
+		printf("\n");
+		
+		printf("4.请输入职业\n");
+		scanf("%s",info[i].object);
+		printf("\n");
+		
+		printf("5.请输入驾龄\n");
+		scanf("%d",&info[i].driving_year);
+		printf("\n");
+		
+		printf("6.请输入年龄\n");
+		scanf("%d",&info[i].years);
+		
+		printf("\n");   
+		  
+		printf("7.请输入车辆品牌\n");
+		scanf("%s",info[i].vehicle_brand);
+		printf("\n");
+		
+		printf("8.请输入车辆款式\n");
+		scanf("%s",info[i].vehicle_style);
+		printf("\n");
+		
+		printf("9.请输入车辆颜色\n");
+		scanf("%s",info[i].vehicle_coolor);
+		printf("\n");
+            }
+            if ((fp = fopen(name, "a+")) == NULL) {//try open the file and ready to write
+                printf("cannot open file\n");
+                system("pause");
+                makechoice(filename);
+            }
+            for (i = 0; i < n; i++) {//write the data to the file
+                if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+                    printf("文件写入错误");
+            }
+            fclose(fp);
+            break;
+        case 2:/*定义任意插入的方法 这种情况下用户要插入的新数据将任意插入到某个数据之前*/
+            if ((fp = fopen(name, "r")) == NULL) {
+                /*先将原来的数据独到内存中做新数据插入前的准备工作*/
+                printf("文件打开错误\n");
+                system("pause");
+                makechoice(filename);
+            }
+            for (i = 0; fread(&info[i], sizeof (struct car_info), 1, fp) != 0; i++) {
+                number = i;
+            }
+            fclose(fp);
+            printf("您打算将新纪录插入到哪个记录的前面\nname=");
+            scanf("%s", insertname);
+            printf("请输入要插入的记录数\nnumber=");
+            scanf("%d", &n);
+            for (i = 0; i < n; i++) {//get infomation from keybord to memory
+                printf(">NO_%d ", i + 1);
+                printf("请输入会员的信息\n");
+     	printf("\n");
+     	
+     	printf("1.请输入会员名\n");    
+		scanf("%s",info[i].name);
+		printf("\n");
+		
+		printf("2.请输入昵称\n");
+		scanf("%s",info[i].nickname);
+		printf("\n");
+		
+		printf("3.请输入性别\n");
+		scanf("%s",info[i].sex);
+		printf("\n");
+		
+		printf("4.请输入职业\n");
+		scanf("%s",info[i].object);
+		printf("\n");
+		
+		printf("5.请输入驾龄\n");
+		scanf("%d",&info[i].driving_year);
+		printf("\n");
+		
+		printf("6.请输入年龄\n");
+		scanf("%d",&info[i].years);
+		
+		printf("\n");   
+		  
+		printf("7.请输入车辆品牌\n");
+		scanf("%s",info[i].vehicle_brand);
+		printf("\n");
+		
+		printf("8.请输入车辆款式\n");
+		scanf("%s",info[i].vehicle_style);
+		printf("\n");
+		
+		printf("9.请输入车辆颜色\n");
+		scanf("%s",info[i].vehicle_coolor);
+		printf("\n");
+            }
+            for (flag = 1, i = 0; flag && i <= number; i++) {//handle(delete) the data in the memory
+                /*利用第一个for循环来找出符合条件的位置，位置应该为：若符合条件的位置的数组下标为i则包括i在内的
+                （number+n+1）-（i+1）个数将要被后移n个位置单位*/
+                if (strcmp(insertname, info[i].name) == 0 && i <= number) {
+                    /*利用if条件定位 准备新数据的写入
+                     */
+                    for (j = number; j > i - 1; j--) {
+                        /*利用第二个for循环将目标位置以后的数据后移
+                                                number+1是原有的数据个数number是下标*/
+                        info[j + n] = info[j];
+                        if (j == i) {
+                            //判断当条件适合的时候进行数据替换
+                            for (k = 0; k < n; k++, j++) {
+                                info[j] = insertinfo[k];
+                            }
+                            /*在数据后移工作以及新数据插入工作完成之后，再次写入文件*/
+                            if ((fp = fopen(name, "w")) == NULL) {
+                                /*先将原来的数据独到内存中做新数据插入前的准备工作*/
+                                printf("文件打开错误\n");
+                                system("pause");
+                                makechoice(filename);
+                            }
+                            for (i = 0; i <= number + n; i++) {//write the data to the file
+                                if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+                                    printf("file write error");
+                            }
+                            fclose(fp);
+                            j = i;
+                            flag = 0;
+                        }
+                    }
+                    puts(info[1].name);
+                }
+            }
+            break;
+    }
+    printf("插入新数据后的车友信息如下:\n");
+    p="r";
+    strcpy(type, p);
+    readout(filename, type);
+    system("pause");
+    makechoice(filename);
+}
+void deletedata(char *name) {
+    /*定义删除数据的方法*/
+    FILE *fp;
+    int i, number;
+    p="r";
+    strcpy(type, p);
+    number = readout(filename, type) - 1;
+    int j, flag;
+    char delname[10];
+    printf("请输入您要删除的车友的姓名:");
+    scanf("%s", delname);
+    for (flag = 1, i = 0; flag && i <= number; i++) {
+        if (strcmp(delname, info[i].name) == 0) 
+		{
+            for (j = i; j <= number; j++) 
+			{
+                strcpy(info[j].name,info[j+1].name);
+                strcpy(info[j].nickname,info[j+1].nickname);
+                strcpy(info[j].sex,info[j+1].sex);
+                strcpy(info[j].object,info[j+1].object);
+                info[j].driving_year=info[j+1].driving_year;
+				info[j].years=info[j+1].years;
+                strcpy(info[j].vehicle_brand,info[j+1].vehicle_brand);
+                strcpy(info[j].vehicle_style,info[j+1].vehicle_style);
+                strcpy(info[j].vehicle_coolor,info[j+1].vehicle_coolor);
+                flag = 0;
+            }
+            printf("您所选的信息以被成功删除!\n");
+        }
+    }
+    if (flag) {
+        printf("没有您要删除的信息 请重试!\n");
+        deletedata(filename);
+    }
+    if ((fp = fopen(name, "w")) == NULL) {//try to open the file 
+        printf("文件打开错误\n");
+        exit(0);
+    }
+    for (i = 0; i < number; i++) {//rewrite the data after the delete handle
+        if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+            printf("文件写入错误");
+    }
+    fclose(fp);
+    printf("删除之后信息如下:\n");
+    p="r";
+    strcpy(type, p);
+    readout(filename, type);
+    system("pause");
+    makechoice(filename);
+}
+void rankout(char *name) {
+    FILE *fp;
+    int i, j, number, choice;
+    if ((fp = fopen(name, "r")) == NULL) {//try to open the file 
+        printf("文件打开错误\n");
+        exit(0);
+    }
+    printf("准备中...\n当前车友信息如下\n\n");
+    printf("=================================================\n");
+    printf("会员名\t车主昵称\t性别\t职业\t驾驶年龄\t车主年龄\t车辆品牌\t车款\t颜色\t\n");
+    for (i = 0; fread(&info[i], sizeof (struct car_info), 1, fp) != 0; i++) {
+        printf("%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t*\n",info[i].name,
+				info[i].nickname,info[i].sex,info[i].object,info[i].driving_year,info[i].years,
+				info[i].vehicle_brand,info[i].vehicle_style,info[i].vehicle_coolor);
+        number = i + 1;
+    }
+    printf("=================================================\n");
+    printf("共有 %d 条记录\n\n", i);
+    fclose(fp);
+    printf("按 1 逆序排序:按 2 顺序排序!\n请您选择（1,2）：");
+    scanf("%d", &choice);
+    switch (choice) {
+        case 1:
+            for (j = 0; j < number; j++) {//sort by the sum backformation
+                //printf("%d",number);
+                /*排名的算法 类冒泡排序*/
+                for (i = 0; i < number - 1; i++) {
+                    if (info[i].years < info[i + 1].years) {
+                        info[number] = info[i];
+                        info[i] = info[i + 1];
+                        info[i + 1] = info[number];
+                    }
+                }
+            }
+            if ((fp = fopen(name, "w")) == NULL) {//try to open the file 
+                printf("文件打开错误\n");
+                exit(0);
+            }
+            for (i = 0; i < number; i++) {//rewrite the data after the delete handle
+                if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+                    printf("文件写入错误");
+            }
+            fclose(fp);
+            if ((fp = fopen(name, "r")) == NULL) {//try to open the file 
+                printf("cannot open file\n");
+                exit(0);
+            }
+            printf("准备中...\n当前车友信息如下\n\n");
+            printf("=================================================\n");
+            printf("会员名\t车主昵称\t性别\t职业\t驾驶年龄\t车主年龄\t车辆品牌\t车款\t颜色\t *\n");
+            for (i = 0; fread(&info[i], sizeof (struct car_info), 1, fp) != 0; i++) {
+                printf("%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t*\n",info[i].name,
+				info[i].nickname,info[i].sex,info[i].object,info[i].driving_year,info[i].years,
+				info[i].vehicle_brand,info[i].vehicle_style,info[i].vehicle_coolor);
+                number = i + 1;
+            }
+            printf("=================================================\n");
+            printf("共有 %d 条记录\n\n", i);
+            fclose(fp);
+            system("pause");
+            break;
+        case 2:
+            p="r";
+            strcpy(type, p);
+            number = readout(filename, type);
+            for (j = 0; j < number; j++) {//sort by the sum orderly
+                for (i = 0; i < number - 1; i++) {
+                    if (info[i].years > info[i + 1].years) {
+                        info[number] = info[i];
+                        info[i] = info[i + 1];
+                        info[i + 1] = info[number];
+                    }
+                }
+            }
+            if ((fp = fopen(name, "w")) == NULL) {//try to open the file 
+                printf("文件打开错误\n");
+                exit(0);
+            }
+            for (i = 0; i < number; i++) {//rewrite the data after the delete handle
+                if (fwrite(&info[i], sizeof (struct car_info), 1, fp) != 1)
+                    printf("文件打开错误");
+            }
+            fclose(fp);
+            if ((fp = fopen(name, "r")) == NULL) {//try to open the file 
+                printf("cannot open file\n");
+                exit(0);
+            }
+            printf("准备中...\n当前车友信息如下\n\n");
+            printf("=================================================\n");
+            printf("会员名\t车主昵称\t性别\t职业\t驾驶年龄\t车主年龄\t车辆品牌\t车款\t颜色\t *\n");
+            for (i = 0; fread(&info[i], sizeof (struct car_info), 1, fp) != 0; i++) {
+                printf("%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t*\n",info[i].name,
+				info[i].nickname,info[i].sex,info[i].object,info[i].driving_year,info[i].years,
+				info[i].vehicle_brand,info[i].vehicle_style,info[i].vehicle_coolor);
+                number = i + 1;
+            }
+            printf("=================================================\n");
+            printf("共有 %d 条记录\n\n", i);
+            fclose(fp);
+            system("pause");
+            break;
+        default:
+            printf("错误选项 请重试!\n");
+            makechoice(filename);
+    }
+    makechoice(filename);
+}
+void deletefile(char *name) 
+{
+    FILE *fp;
+    int choice;
+    char delfilename[50];
+    printf("选择删除方式?\n");
+    printf("1 删除当前文件: 2 删除其他文件\n请您选择（0-9）：");
+    scanf("%d", &choice);
+    switch (choice) {
+        case 2:
+            printf("请输入要删除的文件的路径\npath=");
+            scanf("%s", delfilename);
+            if (remove(filename) == 0)
+                printf("文件删除成功!\n");
+            else
+                printf("文件删除失败!\n");
+            break;
+        case 1:
+            if (remove(filename) == 0)
+                printf("文件删除成功!\n");
+            else
+                printf("文件删除失败!\n");
+            break;
+        default:
+            printf("选择错误 !\n");
+            break;
+    }
+    makechoice(filename);
+}
+void fileinitialize(char *name) {
+    int i, n;
+    //printf("Enter the file path you want to save:\nPath=");
+    //scanf("%s",filename);
+    printf("请输入入会车友的人数?\n>Number=");
+    scanf("%d", &n);
+    printf("\n您将会将 %d 信息记录存储到 %s 文件中\n\n", n, filename);
+    for (i = 0; i < n; i++) {
+        printf(">NO_%d ", i + 1);
+        printf("请输入会员的信息\n");
+     	printf("\n");
+     	
+     	printf("1.请输入会员名\n");    
+		scanf("%s",info[i].name);
+		printf("\n");
+		
+		printf("2.请输入昵称\n");
+		scanf("%s",info[i].nickname);
+		printf("\n");
+		
+		printf("3.请输入性别\n");
+		scanf("%s",info[i].sex);
+		printf("\n");
+		
+		printf("4.请输入职业\n");
+		scanf("%s",info[i].object);
+		printf("\n");
+		
+		printf("5.请输入驾龄\n");
+		scanf("%d",&info[i].driving_year);
+		printf("\n");
+		
+		printf("6.请输入年龄\n");
+		scanf("%d",&info[i].years);
+		
+		printf("\n");   
+		  
+		printf("7.请输入车辆品牌\n");
+		scanf("%s",info[i].vehicle_brand);
+		printf("\n");
+		
+		printf("8.请输入车辆款式\n");
+		scanf("%s",info[i].vehicle_style);
+		printf("\n");
+		
+		printf("9.请输入车辆颜色\n");
+		scanf("%s",info[i].vehicle_coolor);
+		printf("\n");\
+		save(filename, n);
+    }
+    p="r";
+    strcpy(type, p);
+    readout(filename, type);
+    makechoice(filename);
+}
+void update(char *name) {
+    puts("当前文件内数据\n");
+    p="r";
+    strcpy(type, p);
+    readout(filename, type);
+    printf("Update successfully!");
+    system("pause");
+    makechoice(filename);
+}
+void findcar(char *name)  //查找函数 
+{
+	 FILE *fp;
+    int i, number;
+    p="r";
+    strcpy(type, p);
+    number = readout(filename, type) - 1;
+    int j, flag;
+    char findname[10];
+    printf("请输入您要查找的车款:");
+    scanf("%s", findname);
+    for (flag = 1, i = 0; flag && i <= number; i++) 
+	{
+        if (strcmp(findname, info[i].vehicle_brand) == 0) {
+            for (j = i; j <= number; j++) 
+			{
+                printf("会员名："); printf("%s\n",info[i].name);
+			printf("昵称："); printf("%s\n",info[i].nickname);
+			printf("性别："); printf("%s\n",info[i].sex);
+			printf("职业："); printf("%s\n",info[i].object);
+			printf("驾龄："); printf("%d\n",info[i].driving_year);
+			printf("年龄："); printf("%d\n",info[i].years);
+			printf("车辆品牌："); printf("%s\n",info[i].vehicle_brand);
+			printf("车款："); printf("%s\n",info[i].vehicle_style);
+			printf("颜色："); printf("%s\n",info[i].vehicle_coolor);
+			printf("\n");printf("\n");
+            }
+            
+        }
+    }
+    system("pause");
+    makechoice(filename);
+}
+void findsex(char *name)  //查找函数 
+{
+	 FILE *fp;
+    int i, number;
+    p="r";
+    strcpy(type, p);
+    number = readout(filename, type) - 1;
+    int j, flag;
+    char findsex[10];
+    printf("请输入您要查找的性别 :");
+    scanf("%s", findsex);
+    for (flag = 1, i = 0; flag && i <= number; i++) {//handle(delete) the data in the memory
+        if (strcmp(findsex, info[i].sex) == 0) {
+            for (j = i; j <= number; j++) 
+			{
+                printf("会员名："); printf("%s\n",info[i].name);
+			printf("昵称："); printf("%s\n",info[i].nickname);
+			printf("性别："); printf("%s\n",info[i].sex);
+			printf("职业："); printf("%s\n",info[i].object);
+			printf("驾龄："); printf("%d\n",info[i].driving_year);
+			printf("年龄："); printf("%d\n",info[i].years);
+			printf("车辆品牌："); printf("%s\n",info[i].vehicle_brand);
+			printf("车款："); printf("%s\n",info[i].vehicle_style);
+			printf("颜色："); printf("%s\n",info[i].vehicle_coolor);
+			printf("\n");printf("\n");
+            }
+            
+        }
+    }
+    system("pause");
+    makechoice(filename);
+}
+	
+void makechoice(char *name) {
+    time_t now;
+    time(&now);
+    int choice;
+    printf("\n          按 <1> 初始化车友信息数据----------------1\n");
+    printf("          按 <2> 插入记录到管理系统中--------------2\n");
+    printf("          按 <3> 车友退会记录删除------------------3\n");
+    printf("          按 <4> 按年龄排车有信息并输出------------4\n");
+    printf("          按 <5> 删除信息文件----------------------5\n");
+    printf("          按 <6> 信息更新--------------------------6\n");
+    printf("          按 <7> 重新运行程序----------------------7\n");
+    printf("          按 <8> 清屏------------------------------8\n");
+    printf("          按 <9> 显示已有数据----------------------9\n");
+    printf("          按 <10> 按车子品牌查找车友信息-----------10\n");
+    printf("          按 <11> 按性别查找车友信息---------------11\n");
+	printf("          按 <0> 退出------------------------------0\n");
+    printf("          按 Ctrl+C 组合键立即中断程序!\n");
+    printf("\n                                        当前时间:%s\n", ctime(&now));
+    printf("请您选择（0-9）：");
+    scanf("%d", &choice);
+    switch (choice) {
+        case 1:printf("正在执行初始化操作$\n");
+            fileinitialize(filename);
+            break;
+        case 2:printf("正在执行插入操作$\n");
+            insert(filename);
+            break;
+        case 3:printf("正在执行删除数据操作$\n");
+            deletedata(filename);
+            break;
+        case 4:printf("正在执行排名输出操作$\n");
+            rankout(filename);
+            break;
+        case 5:printf("正在执行删除文件操作$\n");
+            deletefile(filename);
+            break;
+        case 6:printf("正在执行文件更新操作$\n");
+            update(filename);
+            break;
+        case 7:system("cls");
+            main();
+            break;
+        case 8:system("cls");
+            makechoice(filename);
+            break;
+        case 9:printf("数据显示$\n");
+            p="r";
+            strcpy(type, p);
+            readout(filename, type);
+            system("pause");
+            makechoice(filename);
+            break;
+        case 10:printf("正在执行文件更新操作$\n");
+        findcar(filename);
+        break;
+        case 11:printf("正在执行文件更新操作$\n");
+        findsex(filename);
+        break;
+		case 0:printf("退出$\n");
+            exit(0);
+            break;
+        
+		default:printf("错误选项 请重试!\n");
+            system("pause");
+            makechoice(filename);
+            break;
+    }
+}
+int main() {
+    	int u=0, a;
+	char str[200];
+	    printf("******************************\n");
+		printf("\n"); 
+		printf("++++++++++请输入密码++++++++++\n");
+		printf("\n");
+		printf("******************************\n");
+	   do{ 
+	    while( ( str[u]= getch() ) != '\r' )  //密码结束所输入的字符
+		{
+			printf("*");
+			u++;
+		} 
+		str[u]='\0';
+		if(check(str))
+		{
+			printf("                        密码输入正确\n");
+			a=1;
+		}
+	
+		else
+		{
+			printf("                        密码输入错误！\n");
+			a=0;
+		}
+		system("cls");
+		
+       }while(a!=1);
+	   int i, choice;
+    printf("=========================================================================\n");
+    printf("\t\t\t欢迎来到车友管理系统\n");
+    printf("\t\t\t\t\t作者：第二小组\n");
+    printf("=========================================================================\n");
+    printf("程序数据将存储到文件中，请先做出路径设置的相关选择以确定文件的路径\n");
+    printf("           1--------------------使用默认路径\n");
+    printf("           2--------------------输入自定义路径\n");
+    printf("           3--------------------重新设置默认路径\n");
+    printf("           0--------------------退出\n");
+    printf("请您选择（0-3）：");
+    scanf("%d", &choice);
+    switch (choice) {
+        case 1:
+            makechoice(filename);
+            break;
+        case 2:
+            printf("Enter new path=");
+            scanf("%s", filename);
+            printf("\n应为路径被更新，文件内容为空，要操作请先初始化数据，请先执行 1选项 操作!\n");
+            makechoice(filename);
+            break;
+        case 3:
+            printf("当前默认路径:%s\n请输入新路径:", filename);
+            scanf("%s", filename);
+            printf("路劲重设成功\t当前路径 :%s\n", filename);
+            system("pause");
+            makechoice(filename);
+            break;
+        case 0:
+            exit(0);
+        default:
+            printf("错误选项 请重试!\n");
+            system("pause");
+            main();
+    }
+}
+
